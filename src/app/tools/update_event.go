@@ -54,7 +54,9 @@ func NewUpdateEventTool(apiClient *intervals.Client) ToolRegistration {
 						return nil, nil, err
 					}
 				}
-
+				if args.StartDateLocal != "" {
+					args.StartDateLocal += "T00:00:00"
+				}
 				payload := updateEventPayload{
 					Name:           args.Name,
 					Description:    args.Description,
