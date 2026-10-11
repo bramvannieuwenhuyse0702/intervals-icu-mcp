@@ -8,6 +8,8 @@ import (
 )
 
 func TestPersistentStoreSurvivesRestart(t *testing.T) {
+	t.Parallel()
+
 	path := filepath.Join(t.TempDir(), "oauth-state.json")
 
 	s1, err := NewStoreFromConfig(StateFile(path))
@@ -63,6 +65,8 @@ func TestPersistentStoreSurvivesRestart(t *testing.T) {
 }
 
 func TestClientTTLSlidesWithUse(t *testing.T) {
+	t.Parallel()
+
 	s := NewStore()
 	created := time.Now().Add(-29 * 24 * time.Hour)
 
@@ -76,6 +80,8 @@ func TestClientTTLSlidesWithUse(t *testing.T) {
 }
 
 func TestCorruptStateFileStartsEmpty(t *testing.T) {
+	t.Parallel()
+
 	path := filepath.Join(t.TempDir(), "oauth-state.json")
 	_ = os.WriteFile(path, []byte("{not json"), 0o600)
 
@@ -90,6 +96,8 @@ func TestCorruptStateFileStartsEmpty(t *testing.T) {
 }
 
 func TestUnwritableStateFileFails(t *testing.T) {
+	t.Parallel()
+
 	if _, err := NewStoreFromConfig(StateFile("/nonexistent-dir/oauth-state.json")); err == nil {
 		t.Fatal("expected error for unwritable path")
 	}

@@ -22,7 +22,10 @@ type persistedState struct {
 	RefreshTokens map[string]*RefreshToken     `json:"refresh_tokens"`
 }
 
-const persistedStateVersion = 1
+const (
+	persistedStateVersion = 1
+	stateFileMode         = 0o600
+)
 
 // NewStoreFromConfig creates a Store. When stateFile is non-empty, existing state is
 // loaded from it and every change to clients or refresh tokens is written back, so
@@ -124,20 +127,20 @@ func (s *Store) persistLocked() error {
 	tmpName := tmp.Name()
 	defer os.Remove(tmpName) //nolint:errcheck // best-effort cleanup; no-op after successful rename.
 
-	if err := tmp.Chmod(0o600); err != nil {
-		tmp.Close()
+	if err := tmp.Chmod(stateFileMode); err != nil {
+		_ = tmp.Close()
 
 		return fmt.Errorf("chmod temp file: %w", err)
 	}
 
 	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 
 		return fmt.Errorf("write temp file: %w", err)
 	}
 
 	if err := tmp.Sync(); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 
 		return fmt.Errorf("sync temp file: %w", err)
 	}
