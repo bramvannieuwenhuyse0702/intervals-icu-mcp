@@ -50,8 +50,8 @@ func TestNewCreateEventTool_Success(t *testing.T) {
 			t.Errorf("expected name=Morning Run, got: %v", parsed["name"])
 		}
 
-		if parsed["start_date_local"] != "2024-03-15" {
-			t.Errorf("expected start_date_local=2024-03-15, got: %v", parsed["start_date_local"])
+		if parsed["start_date_local"] != "2024-03-15T00:00:00" {
+			t.Errorf("expected start_date_local=2024-03-15T00:00:00, got: %v", parsed["start_date_local"])
 		}
 
 		if parsed["category"] != "WORKOUT" {

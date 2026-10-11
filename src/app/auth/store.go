@@ -39,23 +39,23 @@ type Code struct {
 
 // RefreshToken represents an OAuth 2.1 refresh token stored in memory.
 type RefreshToken struct {
-	Token          string
-	ClientID       string
-	GitHubUsername  string
-	Scopes         []string
-	ExpiresAt      time.Time
+	Token          string    `json:"token"`
+	ClientID       string    `json:"client_id"`
+	GitHubUsername string    `json:"github_username"`
+	Scopes         []string  `json:"scopes"`
+	ExpiresAt      time.Time `json:"expires_at"`
 }
 
 // RegisteredClient represents a dynamically registered OAuth client.
 type RegisteredClient struct {
-	ClientID     string
-	RedirectURIs []string
-	ClientName   string
-	GrantTypes   []string
-	CreatedAt    time.Time
+	ClientID     string    `json:"client_id"`
+	RedirectURIs []string  `json:"redirect_uris"`
+	ClientName   string    `json:"client_name"`
+	GrantTypes   []string  `json:"grant_types"`
+	CreatedAt    time.Time `json:"created_at"`
 	// LastUsedAt is bumped whenever the client obtains tokens, so actively used
 	// clients do not expire clientTTL after registration.
-	LastUsedAt time.Time
+	LastUsedAt time.Time `json:"last_used_at"`
 }
 
 // expiresAt returns when the client registration expires (clientTTL after last activity).

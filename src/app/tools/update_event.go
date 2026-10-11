@@ -53,10 +53,11 @@ func NewUpdateEventTool(apiClient *intervals.Client) ToolRegistration {
 					if err != nil {
 						return nil, nil, err
 					}
-				}
-				if args.StartDateLocal != "" {
+
+					// Intervals.icu expects a local datetime, not a bare date.
 					args.StartDateLocal += "T00:00:00"
 				}
+
 				payload := updateEventPayload{
 					Name:           args.Name,
 					Description:    args.Description,

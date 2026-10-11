@@ -51,8 +51,8 @@ func TestNewUpdateEventTool_Success(t *testing.T) {
 			t.Errorf("expected name=Updated Run, got: %v", parsed["name"])
 		}
 
-		if parsed["start_date_local"] != "2024-03-16" {
-			t.Errorf("expected start_date_local=2024-03-16, got: %v", parsed["start_date_local"])
+		if parsed["start_date_local"] != "2024-03-16T00:00:00" {
+			t.Errorf("expected start_date_local=2024-03-16T00:00:00, got: %v", parsed["start_date_local"])
 		}
 
 		w.WriteHeader(http.StatusOK)
