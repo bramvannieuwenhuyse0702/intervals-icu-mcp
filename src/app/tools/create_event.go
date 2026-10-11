@@ -47,7 +47,10 @@ func NewCreateEventTool(apiClient *intervals.Client) ToolRegistration {
 				if err != nil {
 					return nil, nil, err
 				}
+
+				// Intervals.icu expects a local datetime, not a bare date.
 				args.StartDateLocal += "T00:00:00"
+
 				payload, err := json.Marshal(args)
 				if err != nil {
 					return nil, nil, fmt.Errorf("marshaling event body: %w", err)
