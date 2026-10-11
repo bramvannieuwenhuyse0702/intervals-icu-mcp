@@ -17,7 +17,8 @@ Set the following environment variables before running the server:
 | `INTERVALS_API_KEY` | Yes | Your Intervals.icu API key (used for Basic auth) |
 | `INTERVALS_ATHLETE_ID` | Yes | Your Intervals.icu athlete ID (e.g., `i12345`) |
 | `GITHUB_CLIENT_SECRET` | No | GitHub OAuth app client secret (fallback when `--github-client-secret` flag is empty) |
-| `JWT_SECRET` | No | HMAC-SHA256 signing key for JWT tokens (fallback when `--jwt-secret` flag is empty) |
+| `JWT_SECRET` | No | HMAC-SHA256 signing key for JWT tokens (fallback when `--jwt-secret` flag is empty). Set this in production: an auto-generated key changes on every restart and invalidates all access tokens |
+| `STATE_FILE` | No | Path for persisting OAuth clients and refresh tokens (fallback when `--state-file` is empty). The Docker image defaults to `/data/oauth-state.json`; mount a volume on `/data` |
 
 ## Usage
 
@@ -57,6 +58,7 @@ The MCP endpoint is served at `/mcp` (not configurable). When using the streamab
 | `--github-client-secret` | _(empty)_ | GitHub OAuth app client secret (required for streamable; falls back to `GITHUB_CLIENT_SECRET` env var) |
 | `--allowed-users` | _(empty)_ | Comma-separated allowed GitHub usernames (empty = allow all authenticated users) |
 | `--jwt-secret` | _(empty)_ | HMAC-SHA256 signing key for JWT tokens (auto-generated if empty; falls back to `JWT_SECRET` env var) |
+| `--state-file` | _(empty)_ | JSON file for persisting OAuth clients and refresh tokens across restarts (in-memory if empty; falls back to `STATE_FILE` env var) |
 | `--auth-issuer` | _(empty)_ | Issuer URL for the OAuth authorization server (required for streamable). Must be a full URL with http/https scheme |
 
 ### Authentication (streamable transport)

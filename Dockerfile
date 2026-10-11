@@ -8,7 +8,7 @@ ARG VERSION=dev
 ARG DI_VERSION=0.5.0
 ARG COMPILED_AT
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates && mkdir -p /out/data && chown 65534:65534 /out/data && chmod 700 /out/data
 
 WORKDIR /build
 
@@ -41,6 +41,12 @@ LABEL org.opencontainers.image.version="${VERSION}"
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=builder /out/intervals-icu-mcp /intervals-icu-mcp
+COPY --from=builder --chown=65534:65534 /out/data /data
+
+# Persist OAuth clients and refresh tokens so connected MCP clients survive restarts.
+# Mount a volume on /data to also survive container re-creation (image updates).
+ENV STATE_FILE=/data/oauth-state.json
+VOLUME ["/data"]
 
 USER 65534:65534
 

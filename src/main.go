@@ -32,6 +32,7 @@ type cliFlags struct {
 	allowedUsers   string
 	jwtSecret      string
 	authIssuer     string
+	stateFile      string
 }
 
 func parseFlags() cliFlags {
@@ -57,6 +58,8 @@ func parseFlags() cliFlags {
 		"HMAC-SHA256 signing key for JWT tokens (auto-generated if empty).")
 	flag.StringVar(&flags.authIssuer, "auth-issuer", "",
 		"Issuer URL for the OAuth authorization server (required for streamable).")
+	flag.StringVar(&flags.stateFile, "state-file", "",
+		"Path to a JSON file for persisting OAuth clients and refresh tokens across restarts (in-memory if empty).")
 	flag.Parse()
 
 	resolveSecretsFromEnv(&flags)
@@ -73,6 +76,10 @@ func resolveSecretsFromEnv(flags *cliFlags) {
 
 	if flags.jwtSecret == "" {
 		flags.jwtSecret = os.Getenv("JWT_SECRET")
+	}
+
+	if flags.stateFile == "" {
+		flags.stateFile = os.Getenv("STATE_FILE")
 	}
 }
 
@@ -115,6 +122,7 @@ func main() {
 			fx.Supply(auth.RawAllowedUsers(flags.allowedUsers)),
 			fx.Supply(auth.RawJWTSecret(flags.jwtSecret)),
 			fx.Supply(auth.RawIssuer(flags.authIssuer)),
+			fx.Supply(auth.StateFile(flags.stateFile)),
 		))
 	}
 

@@ -53,6 +53,19 @@ type RegisteredClient struct {
 	ClientName   string
 	GrantTypes   []string
 	CreatedAt    time.Time
+	// LastUsedAt is bumped whenever the client obtains tokens, so actively used
+	// clients do not expire clientTTL after registration.
+	LastUsedAt time.Time
+}
+
+// expiresAt returns when the client registration expires (clientTTL after last activity).
+func (c *RegisteredClient) expiresAt() time.Time {
+	last := c.CreatedAt
+	if c.LastUsedAt.After(last) {
+		last = c.LastUsedAt
+	}
+
+	return last.Add(clientTTL)
 }
 
 // Store is a thread-safe in-memory store for OAuth entities.
@@ -64,6 +77,7 @@ type Store struct {
 	clients       map[string]*RegisteredClient
 	stopCleanup   chan struct{}
 	stopOnce      sync.Once
+	statePath     string // empty = in-memory only
 }
 
 // NewStore creates a new empty Store.
@@ -106,6 +120,7 @@ func (s *Store) evictExpired(now time.Time) {
 	defer s.mu.Unlock()
 
 	s.evictExpiredLocked(now)
+	s.persistOrLog()
 }
 
 // evictExpiredLocked is the lock-free version of evictExpired.
@@ -124,7 +139,7 @@ func (s *Store) evictExpiredLocked(now time.Time) {
 	}
 
 	for key, client := range s.clients {
-		if now.After(client.CreatedAt.Add(clientTTL)) {
+		if now.After(client.expiresAt()) {
 			delete(s.clients, key)
 		}
 	}
@@ -229,6 +244,8 @@ func (s *Store) SaveRefreshToken(token *RefreshToken) error {
 	}
 
 	s.refreshTokens[token.Token] = token
+	s.touchClientLocked(token.ClientID, time.Now())
+	s.persistOrLog()
 
 	return nil
 }
@@ -252,6 +269,7 @@ func (s *Store) ConsumeRefreshToken(token, clientID string, now time.Time) (*Ref
 	}
 
 	delete(s.refreshTokens, token)
+	s.persistOrLog()
 
 	if now.After(rt.ExpiresAt) {
 		return nil, errRefreshTokenNotFound
@@ -280,6 +298,7 @@ func (s *Store) RotateRefreshToken(
 
 	if now.After(rt.ExpiresAt) {
 		delete(s.refreshTokens, oldToken)
+		s.persistOrLog()
 
 		return nil, errRefreshTokenNotFound
 	}
@@ -306,6 +325,8 @@ func (s *Store) RotateRefreshToken(
 	newToken.Scopes = cloneStrings(rt.Scopes)
 
 	s.refreshTokens[newToken.Token] = newToken
+	s.touchClientLocked(rt.ClientID, now)
+	s.persistOrLog()
 
 	return rt, nil
 }
@@ -330,8 +351,16 @@ func (s *Store) SaveClient(client *RegisteredClient) error {
 	cp.GrantTypes = cloneStrings(client.GrantTypes)
 
 	s.clients[cp.ClientID] = &cp
+	s.persistOrLog()
 
 	return nil
+}
+
+// touchClientLocked marks a client as recently used. The caller must hold s.mu.
+func (s *Store) touchClientLocked(clientID string, now time.Time) {
+	if c, ok := s.clients[clientID]; ok {
+		c.LastUsedAt = now
+	}
 }
 
 // GetClient retrieves a registered client by its client ID.
@@ -346,7 +375,7 @@ func (s *Store) GetClient(clientID string, now time.Time) (*RegisteredClient, er
 		return nil, errClientNotFound
 	}
 
-	if now.After(client.CreatedAt.Add(clientTTL)) {
+	if now.After(client.expiresAt()) {
 		return nil, errClientNotFound
 	}
 

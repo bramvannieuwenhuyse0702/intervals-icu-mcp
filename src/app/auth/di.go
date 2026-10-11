@@ -11,7 +11,7 @@ var Module = fx.Module("auth", //nolint:gochecknoglobals // fx.Module as package
 	fx.Provide(NewAllowedUsers),
 	fx.Provide(NewValidatedIssuer),
 	fx.Provide(NewJWTSecret),
-	fx.Provide(NewStore),
+	fx.Provide(NewStoreFromConfig),
 	fx.Provide(NewAuthorizationServerMetadata),
 	fx.Provide(NewProtectedResourceMetadata),
 	fx.Provide(NewTokenVerifier),
