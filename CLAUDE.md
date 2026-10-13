@@ -12,6 +12,7 @@
 - `src/app/tools/` package contains MCP tool registrations (one file per tool).
 - `src/app/auth/` package contains OAuth 2.1 core logic (config, JWT issuance/verification, in-memory store, authorization server metadata).
 - `src/app/clients/github/` package contains the GitHub OAuth HTTP client (code exchange, user profile fetching).
+- `src/app/clients/telegram/` package contains a minimal Telegram Bot API client (sendMessage to one fixed chat).
 
 ## Architecture
 
@@ -56,6 +57,7 @@
 - `src/app/api/rest/handler.go` implements `Handler` with OAuth HTTP endpoints: `HandleAuthServerMetadata` (GET `/.well-known/oauth-authorization-server`), `HandleAuthorize` (GET `/oauth/authorize` - validates PKCE, HMAC-signs state, redirects to GitHub), `HandleCallback` (GET `/oauth/callback` - verifies state, exchanges GitHub code, checks allowlist, issues auth code; sanitizes GitHub error parameters against a known-codes allowlist), `HandleToken` (POST `/oauth/token` - authorization_code with atomic PKCE validate-and-consume via `ValidateAndConsumeAuthCode` and refresh_token grants), `HandleRegister` (POST `/oauth/register` - dynamic client registration). `NewHandler` returns `(*Handler, error)` because it derives a separate HKDF state-signing key from the JWT secret (using `golang.org/x/crypto/hkdf`). `HandlerParams` references types from `auth` and `clients/github`.
 - `src/app/api/rest/di.go` contains `rest.Module` (`fx.Module("rest")`), which provides `Handler`. `StreamableModules` composes `rest.Module`.
 - The API router (in streamable mode) registers OAuth discovery and flow endpoints (delegating to `rest.Handler`), applies a dedicated tight per-IP rate limiter (2 req/s, burst 5) to `POST /oauth/register`, and wraps `/mcp` with `auth.RequireBearerToken` middleware that validates JWT bearer tokens and sets `ResourceMetadataURL` to `/.well-known/oauth-protected-resource`.
+- `src/app/clients/telegram/di.go` contains `telegram.Module`, which provides Config (from env vars TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID) and Client. Missing config is not a startup error: `send_telegram` returns `ErrNotConfigured`. Errors never include the request URL, because it contains the bot token. `app.Module` composes `telegram.Module`.
 - API tools receive `*intervals.Client` via DI and return JSON responses as TextContent.
 - `src/app/clients/intervals/testing.go` exports `NewTestClient()` for creating test clients with custom base URLs (used by tool tests with `httptest.Server`). `src/app/clients/github/testing.go` follows the same pattern.
 

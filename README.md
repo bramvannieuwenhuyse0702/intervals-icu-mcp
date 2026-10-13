@@ -18,6 +18,8 @@ Set the following environment variables before running the server:
 | `INTERVALS_ATHLETE_ID` | Yes | Your Intervals.icu athlete ID (e.g., `i12345`) |
 | `GITHUB_CLIENT_SECRET` | No | GitHub OAuth app client secret (fallback when `--github-client-secret` flag is empty) |
 | `JWT_SECRET` | No | HMAC-SHA256 signing key for JWT tokens (fallback when `--jwt-secret` flag is empty). Set this in production: an auto-generated key changes on every restart and invalidates all access tokens |
+| `TELEGRAM_BOT_TOKEN` | No | Telegram bot token (from @BotFather) used by the `send_telegram` tool. If unset, the tool returns an error and the rest of the server works normally |
+| `TELEGRAM_CHAT_ID` | No | Telegram chat ID that `send_telegram` sends to (fixed; the tool cannot send to other chats) |
 | `STATE_FILE` | No | Path for persisting OAuth clients and refresh tokens (fallback when `--state-file` is empty). The Docker image defaults to `/data/oauth-state.json`; mount a volume on `/data` |
 
 ## Usage
@@ -106,6 +108,7 @@ go build -ldflags "-X github.com/0xalexb/hjarta-di.Version=1.0.0 -X github.com/0
 | `get_power_curve` | Returns power curve data by activity type. | `type` (required), `newest` (optional) |
 | `get_wellness` | Returns wellness data for a specific date. | `date` (required) |
 | `get_wellness_trend` | Returns wellness data over a date range. | `oldest` (required), `newest` (required) |
+| `send_telegram` | Sends a plain-text message to the configured Telegram chat (`TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`). | `text` (required, max 4096 chars) |
 
 ## Docker
 

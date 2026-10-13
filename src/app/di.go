@@ -10,6 +10,7 @@ import (
 	"github.com/0xalexb/intervals-icu-mcp/src/app/api/rest"
 	"github.com/0xalexb/intervals-icu-mcp/src/app/auth"
 	"github.com/0xalexb/intervals-icu-mcp/src/app/clients/intervals"
+	"github.com/0xalexb/intervals-icu-mcp/src/app/clients/telegram"
 	ghclient "github.com/0xalexb/intervals-icu-mcp/src/app/clients/github"
 	"github.com/0xalexb/intervals-icu-mcp/src/app/tools"
 )
@@ -18,6 +19,7 @@ import (
 // Transport-agnostic: does not include auth/HTTP modules (see StreamableModules).
 var Module = fx.Module("app", //nolint:gochecknoglobals // fx.Module as package variable is the standard DI pattern.
 	intervals.Module,
+	telegram.Module,
 	tools.Module,
 	fx.Provide(fx.Annotate(NewServer, fx.ParamTags(``, `group:"mcp_tools"`))),
 	fx.Provide(fx.Annotate(

@@ -57,6 +57,10 @@ linters:
       - path: src/app/clients/intervals/
         linters:
           - noinlineerr
+      - path: src/app/clients/telegram/
+        linters:
+          - noinlineerr
+          - tagliatelle
       - path: src/app/clients/
         text: "avoid meaningless package names"
       - path: src/app/
