@@ -7,6 +7,7 @@ import (
 	"go.uber.org/fx/fxtest"
 
 	"github.com/0xalexb/intervals-icu-mcp/src/app/clients/intervals"
+	"github.com/0xalexb/intervals-icu-mcp/src/app/clients/telegram"
 )
 
 func TestModule_ProvidesToolRegistrations(t *testing.T) {
@@ -19,6 +20,7 @@ func TestModule_ProvidesToolRegistrations(t *testing.T) {
 	app := fxtest.New(t,
 		Module,
 		fx.Supply(testClient),
+		fx.Supply(telegram.NewClient(telegram.Config{})),
 		fx.Invoke(fx.Annotate(
 			func(regs []ToolRegistration) {
 				registrations = regs
